@@ -1,0 +1,299 @@
+---
+output: 
+   pdf_document:
+header-includes:
+   - \usepackage{amssymb, amsmath, amsthm}
+   - \usepackage{tabu}
+   - \newcommand{\E}{\mathbb{E}}
+   - \newcommand{\var}{{\rm Var}}
+   - \newcommand{\N}{\mathcal{N}}
+---
+
+\noindent \begin{tabu} to \textwidth {@{}X[4 l] @{}X[r]}
+  \textbf{Problem Set 2}           & \\ 
+  \textbf{MFE 402: Econometrics}   & \\ 
+  \textbf{Professor Rossi}         & 
+\end{tabu}
+
+This problem set is designed to review material on the sampling distribution of least squares.
+
+
+## Question 1
+
+a. Use the formulas for the least squares estimators to express the least squares intercept as a weighted sum (i.e., a linear combination) of the $Y$ values in a similar way as is done in the lecture notes for the slope (see Ch1, pg 74, 77 & 78).
+
+Recall $Y_i = \beta_0+\beta_i+\epsilon_i$
+
+Our estimation of the Least Square Intercept is $b_0 = \bar{Y} - b_1\bar{X}$
+
+Recall that we can express $b_1$ as a linear combination of $Y_i$
+
+$b_1 = \sum_{i=1}^N{c_iY_i}$ with $c_i = (X_i - \bar{X})/\sum_{i=1}^N{(X_i-\bar{X})^2}$
+
+Then
+
+$b_0 = \bar{Y} - \bar{X}\sum_{i=1}^N{c_iY_i}$
+
+b. Use the formula in part (a) to show that $b_0$ is an unbiased estimator for $\beta_0$. That is, show $\E[b_0]=\beta_0$. You may not use the fact $\E[b_1]=\beta_1$ unless you explicitly prove it.
+
+Let's start proving that $\E[b_1] = \beta_1$
+
+$\E[b_1] = \E[\frac{\sum(X_i - \bar{X})Y_i}{\sum(X_i-\bar{X})^2}] =  \frac{\E[\sum(X_i - \bar{X})Y_i]}{\sum(X_i-\bar{X})^2}=\frac{\E[\sum(X_i - \bar{X})Y_i]}{\sum(X_i^2+\bar{X}^2-2X_i\bar{X})}=$
+
+$=\frac{\E[\sum(X_i - \bar{X})Y_i]}{\sum{X_i^2}-N\bar{X}^2)}$
+
+$\E[\sum(X_i - \bar{X})Y_i] = \E[\sum(X_i - \bar{X})Y_i] =$
+
+$=\sum(X_i - \bar{X})\E[Y_i] = \sum(X_i - \bar{X})(\beta_0 + \beta_1X_i) =$
+
+$=\sum(X_i\beta_0 + X_i^2\beta_1 - \bar{X}\beta_0 - X_i\bar{X}\beta_1)=$
+
+$=\beta_0\sum{X_i}-\beta_0N\bar{X}-\beta_1\sum{X_i}^2 - \beta_1N\bar{X}^2=$
+
+$=\beta_1(\sum{X_i}^2 - N\bar{X}^2)$
+
+Hence
+
+$\E[b_1] = \frac{=\beta_1(\sum{X_i}^2 - N\bar{X}^2)}{\sum{X_i^2}-N\bar{X}^2)} = \beta_1$
+
+We can now prove that
+
+$\E[b_0]=\E[\bar{Y}-b_1\bar{X}]=$
+
+$=\frac{1}{N}\sum\E[Y_i] - \bar{X}\E[b_1]=\frac{1}{N}\sum\E[Y_i]-\bar{X}\E[b_1]=$
+
+$=\frac{1}{N}\sum(\beta_0+\beta_iX_i)-\bar{X}\beta_1=\frac{1}{N}(N\beta_0+N\beta_1\bar{X})-\bar{X}\beta_1 = \beta_0$
+
+Alternatively, if we see $b_0 = \bar{Y} - b_1\bar{X}$
+
+$\E[b_0] = \E[\bar{Y} - b_1\bar{X}] = \beta_0+\beta_1\bar{X} - \E[b1]\bar{X}$
+
+Hence
+
+$\E[b_0] = \beta_0$
+
+c. Use the formula in part (a) to show that $\var(b_0) = \sigma^2 \left[ \frac{1}{N} + \frac{\bar{X}^2}{(N - 1) s_X^2} \right]$.
+
+Recall from class that
+
+$\var(b_1) = \frac{\sigma^2}{(N-1)S_x^2}$
+
+then
+
+$\var(b_0) = \var(\bar{Y} - b_1\bar{X}) = \var(\bar{Y}) - \frac{\sigma^2}{(N-1)S_x^2}\var(\bar{X}) =$
+
+$=\var(\frac{1}{N}\sum{Y_i}) - \frac{\sigma^2}{(N-1)S_x^2}\bar{X}^2 =\frac{1}{N^2}\sum\var({Y_i}) - \frac{\sigma^2}{(N-1)S_x^2}\bar{X}^2=$
+
+$=\frac{1}{N^2}N\sigma^2 - \frac{\sigma^2}{(N-1)S_x^2}\bar{X}^2 = \sigma^2[\frac{1}{N} - \frac{\bar{X}^2}{(N-1)S_x^2}]$
+
+Note that parts (b) and (c) are somewhat challenging.
+
+
+## Question 2
+
+a. Write a function in `R` (using `function()`) to simulate from a simple regression model. This function should accept as inputs: $\beta_0$ (intercept), $\beta_1$ (slope), $X$ (a vector of values), and $\sigma$ (error standard deviation). You will need to use `rnorm()` to simulate from the normal distribution. The function should return a vector of $Y$ values.
+
+```{r}
+library(DataAnalytics)
+library(reshape2)
+
+simreg = function(beta_0, beta_1, X, sigma){
+   y = beta_0 + beta_1*X + rnorm(length(X), sd=sigma)
+}
+```
+
+
+b. Simulate $Y$ values from your function and make a scatterplot of $X$ versus simulated $Y$. When simulating, use the `vwretd` data from the `marketRf` dataset as the $X$ vector, and choose $\beta_0=1$, $\beta_1=20$, and $\sigma=1$. Then add the fitted regression line to the plot as well as the true conditional mean line (the function `abline()` may be helpful).
+
+```{r}
+data(Vanguard)
+Van=Vanguard[,c(1,2,5)]
+V_reshaped = dcast(Van, date~ticker, value.var = 'mret')
+data(marketRf)
+Van_market = merge(V_reshaped, marketRf, by='date')
+
+X = Van_market$vwretd
+beta_0 = 1
+beta_1 = 20
+sigma = 1
+N = 10000
+bsim = double(N)
+
+Y = simreg(beta_0, beta_1, X, sigma)
+
+df = data.frame(X, Y)
+
+with(df, plot(X, Y, pch=20, col=rgb(0,0,1,1/4)))
+
+# fitted regression line
+abline(lm(Y~X, data=df)$coef, col='red', lwd=1)
+# true conditional mean line
+abline(beta_0, beta_1, col='green', lwd=1)
+
+legend(0.01, y=-1.2, legend=c('fitted regression line', 'true conditional mean line'), col=c('red', 'green'), lty=1:1, cex=0.7,
+       box.lty=0)
+points(mean(X), mean(Y), pch=10, col='magenta')
+title('SIMULATION')
+```
+
+
+## Question 3
+
+Assume $Y = \beta_0 + \beta_1X + \varepsilon$ with $\varepsilon \sim \N(0,\sigma^2)$. Let $\beta_0 = 2$, $\beta_1 = 0.6$, and $\sigma^2 = 2$. You can make $X$ whatever you like.
+
+a. Use your `R` function from question 2 to simulate the sampling distribution of the intercept. Use a sample size of 300 and calculate $b_0$ for 10,000 samples. Plot a histogram of the sampling distribution of $b_0$. You may find slide 74 of Chapter 1 of the course notes to be helpful.
+
+```{r}
+n = 300
+N = 10000
+
+beta_0 = 2
+beta_1 = 0.6
+sigma = sqrt(2)
+b_0 = double(N)
+
+for(i in 1:N) {
+   Y = simreg(beta_0, beta_1, X[1:n], sigma)
+   b_0[i] = lm(Y~X[1:n])$coef[1]
+}
+
+hist(b_0, breaks=40, col='lightblue')
+```
+
+
+b. Calculate the empirical value for $\E[b_0]$ from your simulation and provide the theoretical value for $\E[b_0]$ (you might find question 1b to be helpful here). Compare the simulated and theoretical values.
+
+```{r}
+# Simulated value for b0
+mean(b_0)
+
+# Theoretical value for b0
+beta_0
+
+```
+Comparison:
+
+The simulated value closely resembles the actual value 2.0000 and will get closer as the sample size gets larger and/or the number of samples increases
+
+c. Calculate the empirical value for $\var(b_0)$ from your simulation and provide the theoretical value for $\var(b_0)$ (you might find question 1c to be helpful here). Compare the simulated and theoretical values.
+
+```{r}
+# Simulated value for Var(b0)
+var(b_0)
+
+# Theoretical value for Var(b0)
+sigma^2*(1/n + mean(X)^2/((n-1)*var(X)))
+
+```
+Comparison:
+
+The simulated value and the theoretical value 0.007 slightly differ. As the sample size gets larger they get closer and tend toward zero
+
+\newpage
+
+## Question 4
+
+Fit a regression of the Vanguard 500 Index Fund returns (VFIAX in the `Vanguard` dataset from the `DataAnalytics` package) on the `vwretd` series (from the `marketRF` dataset in the `DataAnalytics` package).
+
+```{r}
+out = lm(VFIAX~vwretd, data=Van_market)
+```
+
+a. Test the hypothesis $H_0^a: \beta_1 = 1$ at the $0.05$ level of significance using t-statistics.  Report your decision (accept or reject the null hypothesis).
+
+```{r}
+t_stat = function(estim, hyph, std_err){
+   t = (estim - hyph)/std_err
+}
+sign_lev = 0.05
+beta_1_hyph = 1
+
+std_err = sqrt(diag(vcov(out)))[2]
+t = t_stat(out$coefficients[2], beta_1_hyph, std_err)
+t_star = qt(sign_lev/2, df=length(Van_market$vwretd)-2)
+
+cat('t = ', abs(t))
+cat('\nt* = ', abs(t_star))
+if (abs(t) > abs(t_star)) {
+   cat('\nWe reject the Null Hyphotesis')
+} else {
+   cat('\nWe accept the Null Hyphotesis')
+}
+```
+
+b. Test the hypothesis $H_0^b: \beta_0 = 0$ at the $0.01$ level of significance using p-values. Report your decision (accept or reject the null hypothesis).
+
+```{r}
+sign_lev = 0.01
+beta_1_hyph = 0
+std_err = sqrt(diag(vcov(out)))[1]
+t = t_stat(out$coefficients[1], beta_1_hyph, std_err)
+p_value = 2*pt(-abs(t), df=length(Van_market$vwretd)-2)
+cat('Level of significance = ', sign_lev)
+cat('\np-value = ', p_value)
+if (sign_lev > p_value) {
+   cat('\nWe reject the Null Hyphotesis')
+} else {
+   cat('\nWe accept the Null Hyphotesis')
+}
+```
+
+You may **not** use the `summary()` command or a similar command that "automatically" computes t and p values.  You must compute the t and p values "by hand". You may, however, use `qt()`, `pt()`, or similar commands. You may also use `vcov()` to help you find a standard error should you need one.
+
+\subsubsection*{Question 5}
+
+Standard errors and p-values.
+
+a. What is a standard error (of a sample statistic or an estimator)? How is a standard error different from a standard deviation?
+
+The standard error is a measure of the deviation of the sample statistic from the true value of the parameter. It can also be seen as an estimation of the standard deviation of the residuals.
+
+The difference between the standard error and a sample's standard deviation is that the latter measures the dispersion of the sample's data from the sample mean, while the former measures how far the estimated mean is from the population mean.
+
+
+b. What is sampling error? How does the standard error capture sampling error?
+
+A sampling error is a statistical error caused by a non-accurate or incomplete sampling of a population. When the sample does not fully represent a population, the sample's statistics does not precisely estimate the population's parameters. We can see the standard error as a measure of the sampling error, or how far the estimated mean is from the population mean.
+
+c. Your friend Steven is working as an investment analyst and comes to you with some output from some statistical method that you've never heard of. Steven tells you that the output has both parameter estimates and standard errors. He then asks, ``how do I interpret and use the standard errors?'' What do you say to Steven to help him even though you don't know what model is involved?
+
+The standard error gives you an estimation of how precisely your statistic is estimating the parameter of interest. You can see it as the estimation of the standard deviation of residuals.
+
+d. Your friend Xingua works with Steven. She also needs help with her statistical model. Her output reports a test statistic and the p-value. Xingua has a Null Hypothesis and a significance level in mind, but she asks ``how do I interpret and use this output?''  What do you say to Xingua to help her even though you don't know what model is involved?
+
+The p-value can be interpreted as the smallest level of significance at which the Null Hypothesis can be rejected. If her level of significance is smaller than p then she cannot reject the Null.
+
+\subsubsection*{Question 6}
+
+Use the fitted regression of `VGHCX` (in the `Vanguard` dataset from the `DataAnalytics` package) on `vwretd` (from the `marketRF` dataset in the `DataAnalytics` package) to answer the following questions. You may not use the `predict()` command. You must perform the calculations "by hand". Note that the data has values like 0.003, which is a positive return of 0.3\%.
+
+a. Compute an estimate of the conditional mean of the Vanguard HCX fund's return given that the market is up by 5\%. 
+
+```{r}
+out = lm(VGHCX~vwretd, data=Van_market)
+b_0 = out$coefficients[1]
+b_1 = out$coefficients[2]
+X_m = 0.05
+Y_f = b_0 + b_1*X_m
+print(Y_f)
+```
+
+b. Compute an estimate of the conditional standard deviation of the Vanguard HCX fund's return given that the market is up by 10\%.
+
+```{r}
+X_m = 0.1
+N = length(out$residuals)
+std = sqrt(sum(out$residuals^2/(N-2)))
+print(std)
+```
+
+c. Compute an estimate of the prediction error ($s_\text{pred}$) for a prediction of the Vanguard HCX fund's return given that the market is up by 15\%.
+
+```{r}
+X_m = 0.15
+s_spread = std*sqrt((1 + 1/N + (X_m - mean(X))^2/((N-1)*var(X))))
+print(s_spread)
+```
+
+
+
